@@ -4,6 +4,7 @@ class Market
   def initialize(name)
     @name = name
     @vendors = []
+    @total = Hash.new(0)
   end
 
   def add_vendor(vendor)
@@ -35,13 +36,35 @@ class Market
   end
 
   def total_inventory
-    total_inventory = Hash.new(0)
     @vendors.each do |vendor|
       vendor.inventory.each do |item,count|
-        total_inventory[item] += count
+        @total[item] += count
       end
     end
+    @total
+  end
+
+
+  def sell(item,count)
     total_inventory
+    counts = count
+    if @total[item] == 0 || @total[item] < count
+      return false
+    end
+    until counts <= 0
+      @vendors.each do |vendor|
+        if !vendor.inventory.has_key?(item)
+          counts -= 0
+        elsif vendor.inventory[item] > 0 && count < vendor.inventory[item]
+          vendor.inventory[item] -= count
+          counts -= count
+        elsif vendor.inventory[item] > 0 && count > vendor.inventory[item]
+          vendor.inventory[item] = 0
+          counts -= count
+        end
+      end
+    end
+    true
   end
 
 
